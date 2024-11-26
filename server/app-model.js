@@ -6,4 +6,15 @@ function selectTopics() {
   });
 }
 
-module.exports = { selectTopics };
+function selectArticle(articleID) {
+  return db
+    .query(
+      `SELECT * FROM articles
+        WHERE article_id = ${articleID};`
+    )
+    .then(({ rows }) => {
+      return rows[0]
+    });
+}
+
+module.exports = { selectTopics, selectArticle };
