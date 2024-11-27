@@ -1,6 +1,11 @@
 const { ended } = require("../db/connection");
 const endpoints = require("../endpoints.json");
-const { selectTopics, selectArticle, selectArticlesX } = require("./app-model");
+const {
+  selectTopics,
+  selectArticle,
+  selectArticlesX,
+  selectComments,
+} = require("./app-model");
 
 function getApi(req, res) {
   res.status(200).send({ endpoints: endpoints });
@@ -22,4 +27,10 @@ function getArticlesX(req, res) {
   selectArticlesX().then((articles) => res.send({ articles }));
 }
 
-module.exports = { getApi, getTopics, getArticle, getArticlesX };
+function getComments(req, res) {
+  const articleID = req.params.article_id;
+  res.status(200);
+  selectComments(articleID).then((comments) => res.send({ comments }));
+}
+
+module.exports = { getApi, getTopics, getArticle, getArticlesX, getComments };

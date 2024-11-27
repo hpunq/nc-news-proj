@@ -48,6 +48,7 @@ describe("GET /api/articles/:article_id", () => {
       .get("/api/articles/1")
       .expect(200)
       .then(({ body: { article } }) => {
+        console.log(article)
         expect(article).toStrictEqual({
           article_id: 1,
           title: "Living in the shadow of a great man",
@@ -127,5 +128,48 @@ describe("GET /api/articles", () => {
       .then(({ body: { articles } }) => {
         expect(articles).toBeSortedBy("created_at", { descending: true });
       });
+  });
+});
+describe("GET /api/articles/:article_id/comments", () => {
+  test("200: Article produces an array of comments with the following properties", () => {
+    return request(app)
+      .get("/api/articles/9/comments")
+      .expect(200)
+      .then(({ body: { comments } }) => {
+        expect(comments).toStrictEqual([
+          {
+            body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+            votes: 16,
+            author: "butter_bridge",
+            article_id: 9,
+            comment_id: 1,
+            created_at: "2020-04-06T12:17:00.000Z",
+          },
+          {
+            body: "The owls are not what they seem.",
+            votes: 20,
+            author: "icellusedkars",
+            article_id: 9,
+            comment_id: 17,
+            created_at: "2020-03-14T17:02:00.000Z",
+          },
+        ]);
+      });
+  });
+  test("200: Comments are ordered by date in descending order (most to least recent)", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body: { comments } }) => {
+        expect(comments).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+  test("200: Articles with no comments return an empty array'", () => {
+    return request(app)
+      .get("/api/articles/7/comments")
+      .expect(200)
+      .then(({body: {comments}}) => {
+        expect(comments).toStrictEqual([])
+      })
   });
 });
