@@ -1,3 +1,4 @@
 \c nc_news_test
-SELECT * FROM articles
-WHERE article_id = 2
+SELECT author, title, article_id, topic, created_at, votes, article_img_url FROM articles ORDER BY created_at DESC;
+
+SELECT * FROM comments;
