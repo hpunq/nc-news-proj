@@ -23,7 +23,7 @@ function selectArticlesX() {
       `SELECT author, title, article_id, topic, created_at, votes, article_img_url FROM articles
         ORDER BY created_at DESC;
         
-        SELECT * FROM COMMENTS;`
+        SELECT article_id FROM COMMENTS;`
     )
     .then((response) => {
       const articleQuery = response[0].rows;
@@ -38,4 +38,15 @@ function selectArticlesX() {
     });
 }
 
-module.exports = { selectTopics, selectArticle, selectArticlesX };
+function selectComments(articleID){
+    return db
+    .query(`
+        SELECT * FROM comments
+        WHERE article_id = ${articleID}
+        ORDER BY created_at DESC;`)
+        .then(({rows}) => {
+            return rows
+        })
+}
+
+module.exports = { selectTopics, selectArticle, selectArticlesX, selectComments};
