@@ -42,8 +42,7 @@ function selectArticlesX() {
 
 function selectComments(articleID) {
   return db
-    .query(
-      `
+    .query(`
         SELECT * FROM comments
         WHERE article_id = ${articleID}
         ORDER BY created_at DESC;`
