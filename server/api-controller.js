@@ -9,7 +9,7 @@ const {
 } = require("./app-model");
 
 function getApi(req, res) {
-  res.status(200).send({ endpoints: endpoints });
+  res.status(200).send({ endpoints });
 }
 
 function getTopics(req, res) {
