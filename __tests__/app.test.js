@@ -31,14 +31,20 @@ describe("GET /api/topics", () => {
       .get("/api/topics")
       .expect(200)
       .then(({ body: { topics } }) => {
-        topics.forEach((topic) => {
-          expect(topic).toEqual(
-            expect.objectContaining({
-              slug: expect.any(String),
-              description: expect.any(String),
-            })
-          );
-        });
+        expect(topics).toStrictEqual([
+          {
+            description: 'The man, the Mitch, the legend',
+            slug: 'mitch'
+          },
+          {
+            description: 'Not dogs',
+            slug: 'cats'
+          },
+          {
+            description: 'what books are made of',
+            slug: 'paper'
+          }
+        ]);
       });
   });
 });
@@ -174,18 +180,21 @@ describe("GET /api/articles/:article_id/comments", () => {
 });
 describe("POST /api/articles/:article_id/comments", () => {
   test("201: Posts a commment to an article and returns it as a response", () => {
-    const testComment = {username: "butter_bridge", body: "the dog is in the eye of the beholder"}
+    const testComment = {
+      username: "butter_bridge",
+      body: "the dog is in the eye of the beholder",
+    };
     return request(app)
-    .post("/api/articles/9/comments")
-    .send(testComment)
-    .expect(201)
-      .then(({body: {newComment}}) => {
-        console.log(newComment)
+      .post("/api/articles/9/comments")
+      .send(testComment)
+      .expect(201)
+      .then(({ body: { newComment } }) => {
+        console.log(newComment);
         expect(newComment).toMatchObject({
           author: "butter_bridge",
           body: "the dog is in the eye of the beholder",
-          article_id: 9
-        })
-      })
+          article_id: 9,
+        });
+      });
   });
 });
