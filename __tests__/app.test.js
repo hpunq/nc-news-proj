@@ -48,7 +48,6 @@ describe("GET /api/articles/:article_id", () => {
       .get("/api/articles/1")
       .expect(200)
       .then(({ body: { article } }) => {
-        console.log(article)
         expect(article).toStrictEqual({
           article_id: 1,
           title: "Living in the shadow of a great man",
@@ -168,8 +167,25 @@ describe("GET /api/articles/:article_id/comments", () => {
     return request(app)
       .get("/api/articles/7/comments")
       .expect(200)
-      .then(({body: {comments}}) => {
-        expect(comments).toStrictEqual([])
+      .then(({ body: { comments } }) => {
+        expect(comments).toStrictEqual([]);
+      });
+  });
+});
+describe("POST /api/articles/:article_id/comments", () => {
+  test("201: Posts a commment to an article and returns it as a response", () => {
+    const testComment = {username: "butter_bridge", body: "the dog is in the eye of the beholder"}
+    return request(app)
+    .post("/api/articles/9/comments")
+    .send(testComment)
+    .expect(201)
+      .then(({body: {newComment}}) => {
+        console.log(newComment)
+        expect(newComment).toMatchObject({
+          author: "butter_bridge",
+          body: "the dog is in the eye of the beholder",
+          article_id: 9
+        })
       })
   });
 });

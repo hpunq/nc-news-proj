@@ -29,24 +29,47 @@ function selectArticlesX() {
       const articleQuery = response[0].rows;
       const commentQuery = response[1].rows;
 
-    const articles = articleQuery.map((article => {
-        const matchComment = commentQuery.filter((comment) => comment.article_id === article.article_id)
-        article.comment_count = matchComment.length
-        return article
-    }))
-    return articles
+      const articles = articleQuery.map((article) => {
+        const matchComment = commentQuery.filter(
+          (comment) => comment.article_id === article.article_id
+        );
+        article.comment_count = matchComment.length;
+        return article;
+      });
+      return articles;
     });
 }
 
-function selectComments(articleID){
-    return db
-    .query(`
+function selectComments(articleID) {
+  return db
+    .query(
+      `
         SELECT * FROM comments
         WHERE article_id = ${articleID}
-        ORDER BY created_at DESC;`)
-        .then(({rows}) => {
-            return rows
-        })
+        ORDER BY created_at DESC;`
+    )
+    .then(({ rows }) => {
+      return rows;
+    });
 }
 
-module.exports = { selectTopics, selectArticle, selectArticlesX, selectComments};
+function addComment(comment, articleID) {
+  return db.query(
+    `
+        INSERT INTO comments(author, body, article_id)
+        VALUES ($1, $2, $3)
+        RETURNING *;`,
+    [comment.username, comment.body, articleID]
+  )
+  .then(({rows}) => {
+    return rows[0]
+  });
+}
+
+module.exports = {
+  selectTopics,
+  selectArticle,
+  selectArticlesX,
+  selectComments,
+  addComment,
+};
