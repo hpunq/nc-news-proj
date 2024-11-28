@@ -5,6 +5,7 @@ const {
   selectArticle,
   selectArticlesX,
   selectComments,
+  addComment,
 } = require("./app-model");
 
 function getApi(req, res) {
@@ -33,4 +34,21 @@ function getComments(req, res) {
   selectComments(articleID).then((comments) => res.send({ comments }));
 }
 
-module.exports = { getApi, getTopics, getArticle, getArticlesX, getComments };
+function postComment(req, res) {
+  const comment = req.body;
+  const articleID = req.params.article_id;
+  res.status(201);
+  addComment(comment, articleID)
+  .then((newComment) => {
+    res.send({newComment});
+  });
+}
+
+module.exports = {
+  getApi,
+  getTopics,
+  getArticle,
+  getArticlesX,
+  getComments,
+  postComment,
+};
