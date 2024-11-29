@@ -10,7 +10,8 @@ function selectArticle(articleID) {
   return db
     .query(
       `SELECT * FROM articles
-        WHERE article_id = ${articleID};`
+        WHERE article_id = $1;`,
+      [articleID]
     )
     .then(({ rows }) => {
       return rows[0];
@@ -42,10 +43,12 @@ function selectArticlesX() {
 
 function selectComments(articleID) {
   return db
-    .query(`
+    .query(
+      `
         SELECT * FROM comments
-        WHERE article_id = ${articleID}
-        ORDER BY created_at DESC;`
+        WHERE article_id = $1
+        ORDER BY created_at DESC;`,
+      [articleID]
     )
     .then(({ rows }) => {
       return rows;
@@ -53,16 +56,33 @@ function selectComments(articleID) {
 }
 
 function addComment(comment, articleID) {
-  return db.query(
-    `
+  return db
+    .query(
+      `
         INSERT INTO comments(author, body, article_id)
         VALUES ($1, $2, $3)
         RETURNING *;`,
-    [comment.username, comment.body, articleID]
-  )
-  .then(({rows}) => {
-    return rows[0]
-  });
+      [comment.username, comment.body, articleID]
+    )
+    .then(({ rows }) => {
+      return rows[0];
+    });
+}
+
+function updateArticleVote(voteValue, articleID) {
+  return db
+    .query(
+      `UPDATE articles
+        SET
+        votes = votes + $1
+        WHERE article_id = $2
+        RETURNING *;
+        `,
+      [voteValue, articleID]
+    )
+    .then(({ rows }) => {
+      return rows[0]
+    });
 }
 
 module.exports = {
@@ -71,4 +91,5 @@ module.exports = {
   selectArticlesX,
   selectComments,
   addComment,
+  updateArticleVote,
 };

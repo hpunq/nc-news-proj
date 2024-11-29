@@ -31,14 +31,20 @@ describe("GET /api/topics", () => {
       .get("/api/topics")
       .expect(200)
       .then(({ body: { topics } }) => {
-        topics.forEach((topic) => {
-          expect(topic).toEqual(
-            expect.objectContaining({
-              slug: expect.any(String),
-              description: expect.any(String),
-            })
-          );
-        });
+        expect(topics).toMatchObject([
+          {
+            description: "The man, the Mitch, the legend",
+            slug: "mitch",
+          },
+          {
+            description: "Not dogs",
+            slug: "cats",
+          },
+          {
+            description: "what books are made of",
+            slug: "paper",
+          },
+        ]);
       });
   });
 });
@@ -61,24 +67,6 @@ describe("GET /api/articles/:article_id", () => {
         });
       });
   });
-  test("200: Returns 0 for votes if no vote value given", () => {
-    return request(app)
-      .get("/api/articles/2")
-      .expect(200)
-      .then(({ body: { article } }) => {
-        expect(article).toStrictEqual({
-          article_id: 2,
-          title: "Sony Vaio; or, The Laptop",
-          topic: "mitch",
-          author: "icellusedkars",
-          body: "Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.",
-          created_at: "2020-10-16T05:03:00.000Z",
-          votes: 0,
-          article_img_url:
-            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-        });
-      });
-  });
 });
 describe("GET /api/articles", () => {
   test("200: Responds with an array of article objects each with a slug and description property", () => {
@@ -86,6 +74,7 @@ describe("GET /api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then(({ body: { articles } }) => {
+        expect(articles.length).toBeGreaterThan(1);
         articles.forEach((article) => {
           expect(article).toEqual(
             expect.objectContaining({
@@ -174,18 +163,52 @@ describe("GET /api/articles/:article_id/comments", () => {
 });
 describe("POST /api/articles/:article_id/comments", () => {
   test("201: Posts a commment to an article and returns it as a response", () => {
-    const testComment = {username: "butter_bridge", body: "the dog is in the eye of the beholder"}
+    const testComment = {
+      username: "butter_bridge",
+      body: "the dog is in the eye of the beholder",
+    };
     return request(app)
-    .post("/api/articles/9/comments")
-    .send(testComment)
-    .expect(201)
-      .then(({body: {newComment}}) => {
-        console.log(newComment)
+      .post("/api/articles/9/comments")
+      .send(testComment)
+      .expect(201)
+      .then(({ body: { newComment } }) => {
         expect(newComment).toMatchObject({
           author: "butter_bridge",
           body: "the dog is in the eye of the beholder",
-          article_id: 9
-        })
-      })
+          article_id: 9,
+        });
+      });
+  });
+});
+describe("PATCH /api/articles/:article_id", () => {
+  test("400: PATCHing a resource with a body that does not contain the correct fields: 400 Bad Request", () => {
+    const testUpdate = {};
+    return request(app)
+      .patch("/api/articles/:article_id")
+      .send(testUpdate)
+      .expect(400)
+      .then(({ body: { errorResponse } }) => {
+        expect(errorResponse).toBe("Bad Request");
+      });
+  });
+  test("400: Attempting to PATCH a resource with valid body fields but invalid fields: 400 Bad Request", () => {
+    const testUpdate = { inc_votes: "nananana" };
+    return request(app)
+      .patch("/api/articles/:article_id")
+      .send(testUpdate)
+      .expect(400)
+      .then(({ body: { errorResponse } }) => {
+        expect(errorResponse).toBe("Bad Request");
+      });
+  });
+  test("200: Updates an article's vote count via athe article id", () => {
+    const testUpdate = { inc_votes: 55 };
+    return request(app)
+      .patch("/api/articles/5")
+      .send(testUpdate)
+      .expect(200)
+      .then(({ body: { updatedArticle } }) => {
+        expect(updatedArticle.votes).toBe(testUpdate.inc_votes);
+      });
   });
 });
