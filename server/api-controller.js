@@ -6,7 +6,8 @@ const {
   selectArticlesX,
   selectComments,
   addComment,
-  updateArticleVote
+  updateArticleVote,
+  removeCommentById
 } = require("./app-model");
 
 function getApi(req, res) {
@@ -54,6 +55,21 @@ function patchArticleVote(req, res){
     })
 }
 
+function deleteArticleComment(req, res, next){
+  const commentID = req.params.comment_id
+  if (typeof(commentID - "") !== "number") res.status(400).send({errorResponse: "Bad Request"})
+  
+  removeCommentById(commentID).then(() => {
+    res.status(204).send({})
+  })
+  .catch((err) => {
+    next(err)
+  })
+
+}
+
+// all controllers require .catch containing next
+
 module.exports = {
   getApi,
   getTopics,
@@ -61,5 +77,6 @@ module.exports = {
   getArticlesX,
   getComments,
   postComment,
-  patchArticleVote
+  patchArticleVote,
+  deleteArticleComment
 };

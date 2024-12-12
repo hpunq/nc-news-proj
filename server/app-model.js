@@ -81,8 +81,24 @@ function updateArticleVote(voteValue, articleID) {
       [voteValue, articleID]
     )
     .then(({ rows }) => {
-      return rows[0]
+      return rows[0];
     });
+}
+
+function removeCommentById(commentID) {
+  return db.query(
+    `DELETE FROM comments
+    WHERE comment_id = $1
+    RETURNING *;
+    `,
+    [commentID]
+  ).then(({rows}) => {
+    if (rows.length === 0) {
+      return Promise.reject({status: 404,
+        errorResponse: "Comment not found"
+      })
+    }
+  })
 }
 
 module.exports = {
@@ -92,4 +108,5 @@ module.exports = {
   selectComments,
   addComment,
   updateArticleVote,
+  removeCommentById,
 };

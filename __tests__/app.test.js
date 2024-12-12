@@ -212,3 +212,28 @@ describe("PATCH /api/articles/:article_id", () => {
       });
   });
 });
+
+describe("DELETE /api/comments/:comment_id", () => {
+  test("400: Invalid endpoint", () => {
+    return request(app)
+      .delete("/api/comments/invalidinput")
+      .expect(400)
+      .then(({body: {errorResponse}}) => {
+        expect(errorResponse).toBe("Bad Request");
+      })
+  })
+  test("404: Valid endpoint, but not available", () => {
+    return request(app)
+      .delete("/api/comments/99999")
+      .expect(404)
+      .then(({body: {errorResponse}}) => {
+        expect(errorResponse).toBe("Comment not found");
+      })
+  })
+  test("204: Deletes a comment object from comments array", () => {
+
+    return request(app)
+      .delete("/api/comments/1")
+      .expect(204)
+  });
+});
