@@ -14,6 +14,12 @@ function selectArticle(articleID) {
       [articleID]
     )
     .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          errorResponse: "Article does not exist",
+        });
+      }
       return rows[0];
     });
 }
@@ -81,24 +87,33 @@ function updateArticleVote(voteValue, articleID) {
       [voteValue, articleID]
     )
     .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          errorResponse: "Article does not exist",
+        });
+      }
       return rows[0];
     });
 }
 
 function removeCommentById(commentID) {
-  return db.query(
-    `DELETE FROM comments
+  return db
+    .query(
+      `DELETE FROM comments
     WHERE comment_id = $1
     RETURNING *;
     `,
-    [commentID]
-  ).then(({rows}) => {
-    if (rows.length === 0) {
-      return Promise.reject({status: 404,
-        errorResponse: "Comment not found"
-      })
-    }
-  })
+      [commentID]
+    )
+    .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          errorResponse: "Comment not found",
+        });
+      }
+    });
 }
 
 module.exports = {

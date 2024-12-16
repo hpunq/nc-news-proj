@@ -37,4 +37,8 @@ app.use((err, req, res, next) => {
     res.status(500).send({errorResponse: "Internal server error"})
 })
 
+app.use((req, res, next) =>{
+    res.status(404).send({errorResponse: "Content not found"});
+});
+
 module.exports = app;

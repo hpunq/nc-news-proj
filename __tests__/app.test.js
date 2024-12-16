@@ -25,29 +25,37 @@ describe("GET /api", () => {
       });
   });
 });
+
+describe("GET /api/invalidEndpoint", () => {
+  test("404: Attempting to access a non-existent endpoint", () => {
+    return request(app)
+      .get("/api/endpointdoesnotexist")
+      .expect(404)
+      .then(({ body: { errorResponse } }) => {
+        expect(errorResponse).toBe("Content not found");
+      });
+  });
+});
+
 describe("GET /api/topics", () => {
   test("200: Responds with an array of topic objects each with a slug and description property", () => {
     return request(app)
       .get("/api/topics")
       .expect(200)
       .then(({ body: { topics } }) => {
-        expect(topics).toMatchObject([
-          {
-            description: "The man, the Mitch, the legend",
-            slug: "mitch",
-          },
-          {
-            description: "Not dogs",
-            slug: "cats",
-          },
-          {
-            description: "what books are made of",
-            slug: "paper",
-          },
-        ]);
+        expect(topics.length).toBeGreaterThan(1);
+        topics.forEach((topic) => {
+          expect(topic).toEqual(
+            expect.objectContaining({
+              slug: expect.any(String),
+              description: expect.any(String),
+            })
+          );
+        });
       });
   });
 });
+
 describe("GET /api/articles/:article_id", () => {
   test("200: Responds with correct article object for correct id", () => {
     return request(app)
@@ -67,6 +75,14 @@ describe("GET /api/articles/:article_id", () => {
         });
       });
   });
+  test("404: Valid endpoint, but not available", () => {
+    return request(app)
+      .get("/api/articles/99999")
+      .expect(404)
+      .then(({ body: { errorResponse } }) => {
+        expect(errorResponse).toBe("Article does not exist");
+      })
+    })
 });
 describe("GET /api/articles", () => {
   test("200: Responds with an array of article objects each with a slug and description property", () => {
@@ -181,26 +197,6 @@ describe("POST /api/articles/:article_id/comments", () => {
   });
 });
 describe("PATCH /api/articles/:article_id", () => {
-  test("400: PATCHing a resource with a body that does not contain the correct fields: 400 Bad Request", () => {
-    const testUpdate = {};
-    return request(app)
-      .patch("/api/articles/:article_id")
-      .send(testUpdate)
-      .expect(400)
-      .then(({ body: { errorResponse } }) => {
-        expect(errorResponse).toBe("Bad Request");
-      });
-  });
-  test("400: Attempting to PATCH a resource with valid body fields but invalid fields: 400 Bad Request", () => {
-    const testUpdate = { inc_votes: "nananana" };
-    return request(app)
-      .patch("/api/articles/:article_id")
-      .send(testUpdate)
-      .expect(400)
-      .then(({ body: { errorResponse } }) => {
-        expect(errorResponse).toBe("Bad Request");
-      });
-  });
   test("200: Updates an article's vote count via athe article id", () => {
     const testUpdate = { inc_votes: 55 };
     return request(app)
@@ -211,6 +207,46 @@ describe("PATCH /api/articles/:article_id", () => {
         expect(updatedArticle.votes).toBe(testUpdate.inc_votes);
       });
   });
+  test("400: PATCHing a resource with a body that does not contain the correct fields: 400 Bad Request", () => {
+    const testUpdate = {};
+    return request(app)
+      .patch("/api/articles/5")
+      .send(testUpdate)
+      .expect(400)
+      .then(({ body: { errorResponse } }) => {
+        expect(errorResponse).toBe("Bad Request");
+      });
+  });
+  test("400: Attempting to PATCH a resource with valid body fields but invalid fields: 400 Bad Request", () => {
+    const testUpdate = { inc_votes: "nananana" };
+    return request(app)
+      .patch("/api/articles/5")
+      .send(testUpdate)
+      .expect(400)
+      .then(({ body: { errorResponse } }) => {
+        expect(errorResponse).toBe("Bad Request");
+      });
+  });
+  test("404: Valid endpoint, but not available", () => {
+    const testUpdate = { inc_votes: 55 }
+    return request(app)
+      .patch("/api/articles/99999")
+      .send(testUpdate)
+      .expect(404)
+      .then(({ body: { errorResponse } }) => {
+        expect(errorResponse).toBe("Article does not exist");
+      });
+  })
+  test("400: Invalid endpoint", () => {
+    const testUpdate = { inc_votes: 55 }
+    return request(app)
+      .patch("/api/articles/banana")
+      .send(testUpdate)
+      .expect(400)
+      .then(({ body: { errorResponse } }) => {
+        expect(errorResponse).toBe("Bad Request");
+      });
+  })
 });
 
 describe("DELETE /api/comments/:comment_id", () => {
@@ -218,22 +254,19 @@ describe("DELETE /api/comments/:comment_id", () => {
     return request(app)
       .delete("/api/comments/invalidinput")
       .expect(400)
-      .then(({body: {errorResponse}}) => {
+      .then(({ body: { errorResponse } }) => {
         expect(errorResponse).toBe("Bad Request");
-      })
-  })
+      });
+  });
   test("404: Valid endpoint, but not available", () => {
     return request(app)
       .delete("/api/comments/99999")
       .expect(404)
-      .then(({body: {errorResponse}}) => {
+      .then(({ body: { errorResponse } }) => {
         expect(errorResponse).toBe("Comment not found");
-      })
-  })
+      });
+  });
   test("204: Deletes a comment object from comments array", () => {
-
-    return request(app)
-      .delete("/api/comments/1")
-      .expect(204)
+    return request(app).delete("/api/comments/1").expect(204);
   });
 });

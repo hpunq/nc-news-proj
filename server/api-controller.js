@@ -7,20 +7,26 @@ const {
   selectComments,
   addComment,
   updateArticleVote,
-  removeCommentById
+  removeCommentById,
 } = require("./app-model");
 
 function getApi(req, res) {
   res.status(200).send({ endpoints });
 }
 
-function getTopics(req, res) {
-  selectTopics().then((topics) => res.status(200).send({ topics }));
+function getTopics(req, res, next) {
+  selectTopics()
+    .then((topics) => res.status(200).send({ topics }))
+    .catch((err) => {
+      next(err);
+    });
 }
 
-function getArticle(req, res) {
+function getArticle(req, res, next) {
   const articleID = req.params.article_id;
-  selectArticle(articleID).then((article) => res.status(200).send({ article }));
+  selectArticle(articleID).then((article) => res.status(200).send({ article })).catch((err) => {
+    next(err)
+  })
 }
 
 function getArticlesX(req, res) {
@@ -43,29 +49,32 @@ function postComment(req, res) {
   });
 }
 
-function patchArticleVote(req, res){
-    const voteValue = req.body.inc_votes
-    const articleID = req.params.article_id
+function patchArticleVote(req, res, next) {
+  const voteValue = req.body.inc_votes;
+  const articleID = req.params.article_id;
 
-    if (!voteValue) res.status(400).send({errorResponse: "Bad Request"})
-    if (typeof(voteValue) !== "number") res.status(400).send({errorResponse: "Bad Request"})
-    
-    else updateArticleVote(voteValue, articleID).then((updatedArticle) => {
-        res.status(200).send({updatedArticle})
-    })
+  if (!voteValue) res.status(400).send({ errorResponse: "Bad Request" });
+  if (typeof voteValue !== "number")
+    res.status(400).send({ errorResponse: "Bad Request" });
+  else
+    updateArticleVote(voteValue, articleID)
+      .then((updatedArticle) => {
+        res.status(200).send({ updatedArticle });
+      })
+      .catch((err) => {
+        next(err);
+      });
 }
 
-function deleteArticleComment(req, res, next){
-  const commentID = req.params.comment_id
-  if (typeof(commentID - "") !== "number") res.status(400).send({errorResponse: "Bad Request"})
-  
-  removeCommentById(commentID).then(() => {
-    res.status(204).send({})
-  })
-  .catch((err) => {
-    next(err)
-  })
-
+function deleteArticleComment(req, res, next) {
+  const commentID = req.params.comment_id;
+  removeCommentById(commentID)
+    .then(() => {
+      res.status(204).send({});
+    })
+    .catch((err) => {
+      next(err);
+    });
 }
 
 // all controllers require .catch containing next
@@ -78,5 +87,5 @@ module.exports = {
   getComments,
   postComment,
   patchArticleVote,
-  deleteArticleComment
+  deleteArticleComment,
 };
