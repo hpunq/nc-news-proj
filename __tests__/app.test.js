@@ -270,3 +270,16 @@ describe("DELETE /api/comments/:comment_id", () => {
     return request(app).delete("/api/comments/1").expect(204);
   });
 });
+
+describe("PATCH /api/comments/:comment_id", () => {
+  test("200: Updates a comment's vote count via comment id", () => {
+    const testUpdate = { inc_votes: 8 };
+    return request(app)
+      .patch("/api/comments/4")
+      .send(testUpdate)
+      .expect(200)
+      .then(({ body: { updatedComment } }) => {
+        expect(updatedComment.votes).toBe(-92);
+      });
+  });
+});

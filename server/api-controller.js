@@ -8,6 +8,7 @@ const {
   addComment,
   updateArticleVote,
   removeCommentById,
+  updateCommentVote
 } = require("./app-model");
 
 function getApi(req, res) {
@@ -24,9 +25,11 @@ function getTopics(req, res, next) {
 
 function getArticle(req, res, next) {
   const articleID = req.params.article_id;
-  selectArticle(articleID).then((article) => res.status(200).send({ article })).catch((err) => {
-    next(err)
-  })
+  selectArticle(articleID)
+    .then((article) => res.status(200).send({ article }))
+    .catch((err) => {
+      next(err);
+    });
 }
 
 function getArticlesX(req, res) {
@@ -77,6 +80,19 @@ function deleteArticleComment(req, res, next) {
     });
 }
 
+function patchCommentVote(req, res, next) {
+  const voteValue = req.body.inc_votes;
+  const commentID = req.params.comment_id;
+
+  updateCommentVote(voteValue, commentID)
+    .then((updatedComment) => {
+      res.status(200).send({ updatedComment });
+    })
+    .catch((err) => {
+      next(err);
+    });
+}
+
 // all controllers require .catch containing next
 
 module.exports = {
@@ -88,4 +104,5 @@ module.exports = {
   postComment,
   patchArticleVote,
   deleteArticleComment,
+  patchCommentVote,
 };

@@ -116,6 +116,29 @@ function removeCommentById(commentID) {
     });
 }
 
+function updateCommentVote(voteValue, commentID) {
+  return db
+    .query(
+      `UPDATE comments
+    SET
+    votes = votes + $1
+    WHERE comment_id = $2
+    RETURNING *;
+    `,
+      [voteValue, commentID]
+    )
+    .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          errorResponse: "Comment does not exist",
+        });
+      }
+      console.log(rows)
+      return rows[0];
+    });
+}
+
 module.exports = {
   selectTopics,
   selectArticle,
@@ -124,4 +147,5 @@ module.exports = {
   addComment,
   updateArticleVote,
   removeCommentById,
+  updateCommentVote,
 };
