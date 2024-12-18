@@ -9,6 +9,7 @@ const {
   postComment,
   patchArticleVote,
   deleteArticleComment,
+  patchCommentVote,
 } = require("./api-controller");
 const cors = require("cors");
 
@@ -30,6 +31,8 @@ app.post("/api/articles/:article_id/comments", postComment);
 app.patch("/api/articles/:article_id", patchArticleVote);
 
 app.delete("/api/comments/:comment_id", deleteArticleComment);
+
+app.patch("/api/comments/:comment_id", patchCommentVote)
 
 app.use((err, req, res, next) => {
   if (err.code === "22P02") {
